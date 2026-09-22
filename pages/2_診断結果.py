@@ -1,7 +1,6 @@
 import streamlit as st
-import gspread
-from google.oauth2.service_account import Credentials
 import pandas as pd
+from utils import load_kampo_master
 
 st.set_page_config(page_title="診断結果", page_icon="🌿")
 st.title("🌿 おすすめ漢方の診断結果")
@@ -19,23 +18,8 @@ st.write(f"最有力証：**{top_sho}**")
 if gi_flag:
     st.info("ℹ️ 胃腸が弱いという回答があったため、地黄を含む処方は優先度を下げて表示します。")
 
-# --- スプレッドシート接続 ---
-@st.cache_resource
-def connect_sheet():
-    scopes = [
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive",
-    ]
-    credentials = Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"], scopes=scopes
-    )
-    gc = gspread.authorize(credentials)
-    sh = gc.open_by_url(st.secrets["spreadsheet"]["url"])
-    return sh
-
-sh = connect_sheet()
-kampo_ws = sh.worksheet("漢方薬マスタ")
-df_kampo = pd.DataFrame(kampo_ws.get_all_records())
+# --- データ取得（キャッシュ済み） ---
+df_kampo = load_kampo_master()
 
 # 数値であるべき列を数値型に変換(スプレッドシートは全部文字列で来ることがあるため)
 numeric_cols = ["血虚", "気虚", "瘀血", "気滞", "陰虚", "水滞"]
@@ -45,10 +29,8 @@ for col in numeric_cols:
 
 # --- マッチングロジック ---
 if top_sho in numeric_cols:
-    # 数値列でそのままソート
     df_result = df_kampo.sort_values(top_sho, ascending=False)
 elif top_sho in ["寒", "熱"]:
-    # 寒熱テキスト列で絞り込み
     keyword = "寒" if top_sho == "寒" else "熱"
     df_result = df_kampo[df_kampo["寒熱"].str.contains(keyword, na=False)]
     if df_result.empty:
@@ -66,7 +48,7 @@ else:
 # --- 胃腸フラグによる地黄含有薬の除外(降順) ---
 if gi_flag and "地黄含有" in df_result.columns:
     df_result["地黄ペナルティ"] = df_result["地黄含有"].apply(lambda x: 1 if x == "有" else 0)
-    df_result = df_result.sort_values("地黄ペナルティ")  # 地黄含有=有(1)を後ろに
+    df_result = df_result.sort_values("地黄ペナルティ")
 
 # --- 結果表示 ---
 st.subheader("📋 おすすめ処方（上位3件）")
