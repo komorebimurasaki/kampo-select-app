@@ -1,7 +1,6 @@
 import streamlit as st
-import gspread
-from google.oauth2.service_account import Credentials
 import pandas as pd
+from utils import load_yojo
 
 st.set_page_config(page_title="養生提案", page_icon="🍵")
 st.title("🍵 養生・食養生のおすすめ")
@@ -14,23 +13,8 @@ if "top_sho" not in st.session_state:
 top_sho = st.session_state["top_sho"]
 st.write(f"最有力証：**{top_sho}** に基づくおすすめ養生法です。")
 
-# --- スプレッドシート接続 ---
-@st.cache_resource
-def connect_sheet():
-    scopes = [
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive",
-    ]
-    credentials = Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"], scopes=scopes
-    )
-    gc = gspread.authorize(credentials)
-    sh = gc.open_by_url(st.secrets["spreadsheet"]["url"])
-    return sh
-
-sh = connect_sheet()
-yojo_ws = sh.worksheet("養生提案")
-df_yojo = pd.DataFrame(yojo_ws.get_all_records())
+# --- データ取得（キャッシュ済み） ---
+df_yojo = load_yojo()
 
 # --- ターゲット証でフィルタリング(カンマ区切り対応) ---
 def match_target(target_str, sho):
@@ -45,7 +29,6 @@ df_match = df_yojo[df_yojo["マッチ"]]
 if df_match.empty:
     st.info("該当する養生提案がまだ登録されていません。")
 else:
-    # カテゴリごとにグループ表示
     categories = ["食材", "料理", "和漢茶", "ハーブ"]
     icons = {"食材": "🥬", "料理": "🍲", "和漢茶": "🍵", "ハーブ": "🌿"}
 
