@@ -83,3 +83,6 @@ for idx, row in top3.iterrows():
 
 with st.expander("全処方リストを見る"):
     st.dataframe(df_result[display_cols], hide_index=True)
+
+st.divider()
+st.page_link("pages/3_養生提案.py", label="🍵 養生提案も見る", icon="➡️")

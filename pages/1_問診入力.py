@@ -62,3 +62,12 @@ if st.button("診断結果を見る"):
     st.session_state["scores"] = scores
     st.session_state["top_sho"] = top_sho
     st.session_state["gi_flag"] = (answers.get("Q21", 0) == 1)  # 胃腸が弱いフラグ
+
+    st.divider()
+    st.write("次のページで詳しい結果を確認できます👇")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.page_link("pages/2_診断結果.py", label="🌿 おすすめ漢方を見る", icon="➡️")
+    with col2:
+        st.page_link("pages/3_養生提案.py", label="🍵 養生提案を見る", icon="➡️")

@@ -62,3 +62,6 @@ else:
 
 with st.expander("養生提案データ 全件を見る"):
     st.dataframe(df_yojo.drop(columns=["マッチ"], errors="ignore"), hide_index=True)
+
+st.divider()
+st.page_link("pages/2_診断結果.py", label="🌿 おすすめ漢方を見る", icon="➡️")
