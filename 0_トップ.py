@@ -12,3 +12,13 @@ try:
     st.dataframe(df)
 except Exception as e:
     st.error(f"❌ 接続エラー: {e}")
+
+# --- 一時テストコード（確認後削除） ---
+from utils import get_redflags_for_category, get_escalation_for_flag
+
+st.divider()
+st.subheader("🔧 テスト：循環カテゴリのレッドフラグ")
+st.dataframe(get_redflags_for_category("CAT06"))
+
+st.subheader("🔧 テスト：RF12のエスカレーション条件")
+st.dataframe(get_escalation_for_flag("RF12"))
