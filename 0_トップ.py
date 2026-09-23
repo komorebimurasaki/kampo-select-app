@@ -12,3 +12,4 @@ try:
     st.dataframe(df)
 except Exception as e:
     st.error(f"❌ 接続エラー: {e}")
+
