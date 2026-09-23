@@ -52,6 +52,7 @@ def load_yojo():
     ws = sh.worksheet("養生提案")
     return pd.DataFrame(ws.get_all_records())
 
+
 # ===== 以下、utils.py に追記 =====
 
 @st.cache_data(ttl=3600)
@@ -112,4 +113,3 @@ def get_escalation_for_flag(flag_id, df_escalation=None):
     if df_escalation is None:
         df_escalation = load_escalation()
     return df_escalation[df_escalation["base_flag_id"] == flag_id]
-    
